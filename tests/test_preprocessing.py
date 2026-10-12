@@ -1,48 +1,54 @@
 
-"""Image preprocessing for the MMA3001 project."""
-
-from pathlib import Path
+"""Tests for image preprocessing."""
 
 import cv2
 import numpy as np
+import pytest
+
+from src.preprocessing import extract_image_features
 
 
-def extract_image_features(image_path):
-    """Extract numerical image characteristics.
+def test_uniform_image(tmp_path):
+    """Check features from a uniform grey image."""
 
-    Args:
-        image_path: Path to an RGB image file.
+    image = np.full(
+        (100, 100, 3), 128, dtype=np.uint8
+    )
 
-    Returns:
-        Array containing mean brightness, contrast,
-        mean saturation and edge density.
+    path = tmp_path / "test.png"
+    cv2.imwrite(str(path), image)
 
-    Raises:
-        ValueError: If the image cannot be loaded.
-    """
-    image = cv2.imread(str(image_path))
+    features = extract_image_features(path)
 
-    if image is None:
-        raise ValueError(
-            f"Cannot load image: {image_path}"
+    assert len(features) == 4
+    assert np.isclose(features[0], 128)
+    assert np.isclose(features[1], 0)
+    assert np.isclose(features[2], 0)
+    assert np.isclose(features[3], 0)
+
+
+def test_missing_image():
+    """Check that a missing image raises an error."""
+
+    with pytest.raises(ValueError):
+        extract_image_features(
+            "nonexistent_image_12345.png"
         )
 
-    gray = cv2.cvtColor(
-        image, cv2.COLOR_BGR2GRAY
+
+def test_feature_values(tmp_path):
+    """Check features contain valid numbers."""
+
+    rng = np.random.default_rng(42)
+
+    image = rng.integers(
+        0, 256, (100, 100, 3), dtype=np.uint8
     )
 
-    hsv = cv2.cvtColor(
-        image, cv2.COLOR_BGR2HSV
-    )
+    path = tmp_path / "random.png"
+    cv2.imwrite(str(path), image)
 
-    edges = cv2.Canny(gray, 50, 150)
+    features = extract_image_features(path)
 
-    features = np.array([
-        np.mean(gray),
-        np.std(gray),
-        np.mean(hsv[:, :, 1]),
-        np.mean(edges > 0)
-    ], dtype=float)
-
-    return features
-
+    assert len(features) == 4
+    assert np.all(np.isfinite(features))
