@@ -1,4 +1,7 @@
-
+from src.preprocessing import (
+    extract_image_features,
+    extract_regional_features
+)
 """Tests for image preprocessing."""
 
 import cv2
@@ -52,3 +55,19 @@ def test_feature_values(tmp_path):
 
     assert len(features) == 4
     assert np.all(np.isfinite(features))
+def test_regional_features(tmp_path):
+    """Verify a 3 x 3 grid produces 36 features."""
+    image = np.full(
+        (300, 300, 3), 128, dtype=np.uint8
+    )
+
+    image_path = tmp_path / "regional_test.png"
+    cv2.imwrite(str(image_path), image)
+
+    features = extract_regional_features(
+        image_path, grid_size=3
+    )
+
+    assert features.shape == (36,)
+    assert np.all(np.isfinite(features))
+    assert np.allclose(features[0::4], 128)
