@@ -218,3 +218,24 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Colab and Jupyter
+.ipynb_checkpoints/
+
+# Private configuration
+.env
+
+# Original image datasets
+data/raw/
+data/processed/
+*.zip
+
+# Model files
+saved_models/
+*.pkl
+*.joblib
