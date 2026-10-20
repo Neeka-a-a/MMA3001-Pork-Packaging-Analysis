@@ -1,0 +1,3 @@
+Model,Training time (ms),Prediction time (ms),Validation images
+Linear Regression,6.068912500040824,0.38833450003039616,369
+Decision Tree Regression,143.73177800007397,0.6260705001750466,369
